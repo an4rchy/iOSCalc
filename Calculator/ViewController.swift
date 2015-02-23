@@ -11,7 +11,7 @@ import UIKit
 class ViewController: UIViewController {
     var userIsInTheMiddleOfTypingANumber: Bool  = false;
     let pi = M_PI
-    
+    var brain = CalculatorBrain()
 
     @IBOutlet weak var display: UILabel!
     @IBOutlet weak var history: UILabel!
@@ -36,13 +36,8 @@ class ViewController: UIViewController {
             enter()
         }
         switch operation {
-        case "×": performOperation {$1 * $0}
-        case "÷": performOperation {$1 / $0}
-        case "+": performOperation {$1 + $0}
-        case "−": performOperation {$1 - $0}
-        case "√": performOperation {sqrt($0)}
-        case "sin": performOperation {sin($0)}
-        case "cos": performOperation {cos($0)}
+
+
         case ".": if display.text!.rangeOfString(".") == nil {
             display.text = display.text! + "."
             
@@ -77,13 +72,19 @@ class ViewController: UIViewController {
 
     @IBAction func enter() {
         userIsInTheMiddleOfTypingANumber = false
-        operandStack.append(displayValue)
+        operandStack.append(displayValue!)
         history.text = history.text! + ("\n\(displayValue)")
         println("\(operandStack)")
         println(history.text!)
+        if let result = brain.pushOperand(displayValue!){
+            displayValue = result
+        }
+        else {
+            displayValue = 0
+        }
     }
     
-    var displayValue: Double {
+    var displayValue: Double? {
         get {
             return NSNumberFormatter().numberFromString(display.text!)!.doubleValue
         }

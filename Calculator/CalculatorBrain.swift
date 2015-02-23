@@ -25,21 +25,25 @@ class CalculatorBrain {
         knownOps["+"] = Op.BinaryOperation("+", +)
         knownOps["−"] = Op.BinaryOperation("−") {$1 - $0}
         knownOps["√"] = Op.UnaryOperation("√", sqrt)
+        knownOps["sin"] = Op.UnaryOperation("sin", sin)
+        knownOps["cos"] = Op.UnaryOperation("cos", cos)
 //        knownOps["√"] = Op.UnaryOperation("√") {sqrt($0)}
 
     }
     
     
-    func pushOperand(operand: Double) {
+    func pushOperand(operand: Double) -> Double? {
         opStack.append(Op.Operand(operand))
+        return evaluate()
     }
     
-    func performOperation (symbol: String) {
+    func performOperation (symbol: String) -> Double? {
         if let operation = knownOps[symbol] {
             opStack.append(operation)
         }
+        return evaluate()
     }
-    func evaluate (var ops: [Op]) -> (result: Double?,remainingOps: [Op])
+    private func evaluate (ops: [Op]) -> (result: Double?,remainingOps: [Op])
     {
         if !ops.isEmpty {
             var remainingOps = ops
@@ -49,9 +53,19 @@ class CalculatorBrain {
                 return (operand, remainingOps)
             case .UnaryOperation(_, let operation):
                 let operandEvaluation = evaluate(remainingOps)
-                let operand = operandEvaluation.result
-                return (operation(operand), ...)
-                
+                if let operand = operandEvaluation.result {
+                    return (operation(operand), operandEvaluation.remainingOps)
+
+                }
+            case .BinaryOperation(_, let operation):
+                let op1Evaluation = evaluate(remainingOps)
+                if let operand1 = op1Evaluation.result {
+                    let op2Evaluation = evaluate(op1Evaluation.remainingOps)
+                    if let operand2 = op2Evaluation.result {
+                        return (operation(operand1, operand2), remainingOps)
+                    }
+                }
+
             }
             
         }
@@ -60,7 +74,8 @@ class CalculatorBrain {
     }
     
     func evaluate () -> Double? {
-        evaluate(opStack)
+        let (result, remainder)  = evaluate(opStack)
+        return result
     }
     
 }
