@@ -30,8 +30,29 @@ class CalculatorBrain {
     }
     private var opStack = [Op]()
     private var knownOps = [String: Op]()
+    var variableValues = [String: Double]()
+    var description: String {
+        get {
+            var someString = ""
+            var blah:Op
+            var someStack = opStack
+            while !someStack.isEmpty {
+                blah = someStack.removeLast()
+                switch blah {
+                case .UnaryOperation(let symbol,_):
+                    someString += symbol + "("
+                case .Operand(let value):
+                    someString += "\(value)"
+                }
+                case .BinaryOperation(let symbol, _):
+                    someString+= symbol
+            }
+            return "\(opStack)"
+            }
+    }
 
     init() {
+        knownOps["C"] = Op.UnaryOperation("C",{(test: Double) -> Double in return 0.0})
         knownOps["×"] = Op.BinaryOperation("×", *)
         knownOps["÷"] = Op.BinaryOperation("÷") {$1 / $0}
         knownOps["+"] = Op.BinaryOperation("+", +)
@@ -49,8 +70,13 @@ class CalculatorBrain {
     }
     
     func performOperation (symbol: String) -> Double? {
+        
         if let operation = knownOps[symbol] {
             opStack.append(operation)
+
+        }
+        if symbol == "C" {
+            opStack.removeAll(keepCapacity: false)
         }
         return evaluate()
     }

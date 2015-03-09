@@ -15,10 +15,26 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var display: UILabel!
     
+    @IBOutlet weak var history: UILabel!
     
     @IBAction func appendDigit(sender: UIButton) {
+        println("sender's current title is \(sender.currentTitle!)")
         let digit = sender.currentTitle!
-        if userIsInTheMiddleOfTypingANumber {
+        if sender.currentTitle! == "∏"{
+            if display.text! != "0.0" {
+            enter()
+            }
+            display.text = String(format:"%.5f", pi)
+            enter()
+
+        }
+        else if sender.currentTitle! == "." {
+            if display.text!.rangeOfString(".") == nil {
+            display.text = display.text! + "."
+            }
+        
+        }
+        else if userIsInTheMiddleOfTypingANumber {
            display.text = display.text! + digit
         }
         else {
@@ -44,21 +60,23 @@ class ViewController: UIViewController {
 
     @IBAction func enter() {
         userIsInTheMiddleOfTypingANumber = false
-        if let result = brain.pushOperand(displayValue){
+        if let result = brain.pushOperand(displayValue!){
+            println("pressed enter")
             displayValue = result
         }
         else {
             displayValue = 0
         }
+        history.text = brain.description
     }
     
-    var displayValue: Double {
+    var displayValue: Double? {
         get {
             return NSNumberFormatter().numberFromString(display.text!)!.doubleValue
         }
         
         set {
-            display.text = "\(newValue)"
+            display.text = "\(newValue!)"
             userIsInTheMiddleOfTypingANumber = false;
         }
     }
